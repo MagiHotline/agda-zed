@@ -15,3 +15,17 @@ git clone https://github.com/agda/agda-language-server.git
 cd agda-language-server
 stack install
 ```
+
+## Configuration
+
+By default, the extension looks for `als` in your system `PATH`. If you want to use a specific binary, you can configure it in your Zed `settings.json`:
+
+```json
+"lsp": {
+  "als": {
+    "binary": {
+      "path": "/path/to/your/als"
+    }
+  }
+}
+```

@@ -1,4 +1,4 @@
-use zed_extension_api::{self as zed, Result};
+use zed_extension_api::{self as zed, Result, settings::LspSettings};
 
 struct AgdaExtension;
 
@@ -13,16 +13,34 @@ impl zed::Extension for AgdaExtension {
         worktree: &zed::Worktree,
     ) -> Result<zed::Command> {
 
-        if let Some(path) = worktree.which("als") {
-            return Ok(zed::Command {
-                command: path,
-                args: vec![],
-                env: vec![],
-            });
+        let settings = LspSettings::for_worktree("als", worktree)?;
+
+        if let Some(binary) = settings.binary {
+            return Ok(
+                zed::Command {
+                    command: binary.path.expect("Error in opening binary for Agda LSP"),
+                    args: vec![],
+                    env: vec![]
+                }
+            )
         }
 
-        Err(format!("Could not find 'als' (Agda Language Server) in your PATH.
-            Please ensure you have installed it via cabal and added it to your PATH."))
+        // get where als is located
+        let als_path = worktree
+            .which("als")
+            .ok_or_else(|| format!(
+                "Agda Language Server has not been found. Install it via
+                cabal and set 'binary' settings.json or add it to your PATH"
+            ))?;
+
+
+        return Ok(
+            zed::Command {
+                command: als_path,
+                args: vec![],
+                env: vec![],
+            }
+        )
     }
 }
 
