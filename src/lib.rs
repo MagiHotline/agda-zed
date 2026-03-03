@@ -1,0 +1,29 @@
+use zed_extension_api::{self as zed, Result};
+
+struct AgdaExtension;
+
+impl zed::Extension for AgdaExtension {
+    fn new() -> Self {
+        Self
+    }
+
+    fn language_server_command(
+        &mut self,
+        _language_server_id: &zed::LanguageServerId,
+        worktree: &zed::Worktree,
+    ) -> Result<zed::Command> {
+
+        if let Some(path) = worktree.which("als") {
+            return Ok(zed::Command {
+                command: path,
+                args: vec![],
+                env: vec![],
+            });
+        }
+
+        Err(format!("Could not find 'als' (Agda Language Server) in your PATH.
+            Please ensure you have installed it via cabal and added it to your PATH."))
+    }
+}
+
+zed::register_extension!(AgdaExtension);
